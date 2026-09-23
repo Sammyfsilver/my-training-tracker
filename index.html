@@ -134,6 +134,7 @@ function editPlan(i){let s=data.plan.sessions[i];s.type=prompt('Activity type',s
 function removePlan(i){if(confirm('Remove this planned session?')){data.plan.sessions.splice(i,1);save()}}
 function addGym(){let name=prompt('Session name', 'Upper body');if(!name)return;let ex=[];while(true){let e=prompt('Exercise name (Cancel when finished)');if(!e)break;let sets=prompt('Sets × reps (e.g. 3 × 10)','3 × 10')||'';let weight=prompt('Weight / assistance','')||'';ex.push({e,sets,weight})}data.gym.unshift({date:today,name,exercises:ex});save()}
 function removeGym(i){if(confirm('Remove this gym session?')){data.gym.splice(i,1);save()}}
+ 
 
 render();
 </script>
