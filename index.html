@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#111827" />
+<title>My Training Tracker</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e7eaf0;--accent:#315efb;--good:#15803d;--warn:#b45309;--bad:#b91c1c;--shadow:0 8px 30px rgba(20,30,55,.07);--r:18px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{max-width:1050px;margin:auto;padding:20px 16px 90px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.brand h1{font-size:23px;margin:0}.brand p{margin:2px 0 0;color:var(--muted)}.pill{padding:9px 12px;background:#fff;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+nav{display:flex;gap:7px;overflow:auto;margin-bottom:18px;padding-bottom:2px}nav button{white-space:nowrap;padding:10px 14px;border-radius:12px;background:transparent;color:var(--muted)}nav button.active{background:var(--text);color:#fff}
+.subnav{display:flex;gap:7px;overflow:auto;margin-bottom:9px;padding-bottom:2px}.subnav button{white-space:nowrap;padding:9px 13px;border-radius:11px;background:transparent;color:var(--muted)}.subnav button.active{background:var(--text);color:#fff}.notice{padding:12px 14px;border-radius:13px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}.clickable{cursor:pointer;transition:.15s}.clickable:hover{transform:translateY(-1px)}.grid{display:grid;gap:14px}.scores{grid-template-columns:repeat(4,1fr)}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:17px;box-shadow:var(--shadow)}.score{position:relative;min-height:145px}.score .emoji{font-size:22px}.score h3{margin:7px 0 2px;font-size:15px}.num{font-size:35px;font-weight:750;letter-spacing:-1px}.bar{height:7px;background:#edf0f5;border-radius:9px;overflow:hidden;margin:9px 0}.fill{height:100%;border-radius:9px;background:var(--accent)}.status{font-size:12px;color:var(--muted)}
+.overall{display:flex;align-items:center;gap:20px}.overall .big{font-size:54px;font-weight:800}.section-title{display:flex;justify-content:space-between;align-items:center;margin:25px 2px 10px}.section-title h2{font-size:17px;margin:0}.muted{color:var(--muted)}.two{grid-template-columns:1.25fr .75fr}.three{grid-template-columns:repeat(3,1fr)}.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{padding:12px;border:1px solid var(--line);border-radius:13px}.metric b{display:block;font-size:17px}.metric span{font-size:12px;color:var(--muted)}
+.plan-row{display:grid;grid-template-columns:90px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.plan-row:last-child{border-bottom:0}.tag{font-size:12px;padding:5px 8px;border-radius:8px;background:#f0f2f6;display:inline-block}.done{color:var(--good)}.pending{color:var(--warn)}
+.list{display:grid;gap:9px}.entry{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:13px}.entry small{color:var(--muted)}.btn{padding:10px 13px;border-radius:11px;background:var(--text);color:#fff}.btn.secondary{background:#eef1f6;color:var(--text)}.btn.small{padding:7px 10px;font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+label{display:grid;gap:5px;font-size:13px;color:var(--muted)}input,select,textarea{width:100%;padding:10px 11px;border:1px solid #dfe3eb;border-radius:10px;background:#fff;color:var(--text)}textarea{min-height:75px;resize:vertical}.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.formgrid .full{grid-column:1/-1}.hidden{display:none!important}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:11px 15px;border-radius:12px;display:none;z-index:10}
+@media(max-width:760px){.app{padding:15px 12px 85px}.scores{grid-template-columns:repeat(2,1fr)}.two,.three{grid-template-columns:1fr}.score{min-height:132px}.overall .big{font-size:45px}.plan-row{grid-template-columns:65px 1fr auto}.top{align-items:flex-start}.brand h1{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brand"><h1>My Training Tracker</h1><p id="dateLabel"></p></div><div class="pill">V2 prototype</div></header>
+<div id="periodNav"></div>
+<div id="categoryNav"></div>
+<main id="app"></main>
+</div><div id="toast" class="toast"></div>
+<script>
+const today=new Date().toISOString().slice(0,10);
+const defaultData={
+ settings:{},
+ days:{[today]:{sleep:{duration:5.63,bed:'23:42',wake:'05:20',rem:72,deep:58,charge:52},recovery:{hrv:61,rhr:61,ans:-4.8},activity:{steps:8421,training:'',duration:0,rpe:'',load:0},nutrition:{protein:90,alcohol:false,breakfast:'Greek yoghurt, granola and fruit',lunch:'',dinner:'',snacks:'',creatine:true},body:{weight:'',bp:''},meds:{minoxidil:true,finasteride:true,ramipril:true}}},
+ plan:{week:'',sessions:[{day:'Mon',type:'Run',target:'5–6 km',priority:'High',done:false},{day:'Tue',type:'Gym',target:'Upper body',priority:'High',done:false},{day:'Wed',type:'Rest',target:'Recovery',priority:'',done:true},{day:'Thu',type:'Gym',target:'Lower body',priority:'High',done:false},{day:'Fri',type:'Pilates',target:'1 session',priority:'Medium',done:false},{day:'Sat',type:'Run',target:'10–12 km',priority:'High',done:false},{day:'Sun',type:'Football',target:'40 min',priority:'Medium',done:false}]},
+ gym:[]
+};
+let data=JSON.parse(localStorage.getItem('mtt')||'null')||defaultData;
+if(!data.days[today]) data.days[today]=defaultData.days[today];
+let period='daily', category='overall', screen='dashboard';
+const periods={daily:'Daily',weekly:'Weekly',monthly:'Monthly'};
+const categories={overall:'Overall',sleep:'Sleep',recovery:'Recovery',activity:'Activity',nutrition:'Nutrition'};
+
+function save(){localStorage.setItem('mtt',JSON.stringify(data));showToast('Saved');render()}
+function showToast(x){const t=document.getElementById('toast');t.textContent=x;t.style.display='block';setTimeout(()=>t.style.display='none',1300)}
+function d(){return data.days[today]}
+
+function scoreSleep(x){let dur=Math.min(100,(x.sleep.duration/8)*100);return Math.round(dur*.55+x.sleep.charge*.45)}
+function scoreRecovery(x){let hrv=Math.max(0,Math.min(100,(x.recovery.hrv/70)*100));let rhr=Math.max(0,Math.min(100,100-(x.recovery.rhr-50)*4));let ans=Math.max(0,Math.min(100,50+x.recovery.ans*5));return Math.round(hrv*.4+rhr*.3+ans*.3)}
+function scoreActivity(x){let base=x.activity.training?70:45;let steps=Math.min(100,x.activity.steps/100);let planDone=data.plan.sessions.filter(s=>s.done).length;let planScore=data.plan.sessions.length?planDone/data.plan.sessions.length*100:100;return Math.round(base*.25+steps*.2+planScore*.55)}
+function scoreNutrition(x){let protein=Math.min(100,x.nutrition.protein/100*100);let meals=[x.nutrition.breakfast,x.nutrition.lunch,x.nutrition.dinner].filter(Boolean).length;let mealsScore=meals/3*100;let alcohol=x.nutrition.alcohol?60:100;return Math.round(protein*.55+mealsScore*.3+alcohol*.15)}
+function scores(x=d()){let s=scoreSleep(x),r=scoreRecovery(x),a=scoreActivity(x),n=scoreNutrition(x);return{s,r,a,n,o:Math.round((s+r+a+n)/4)}}
+
+function scoreCard(icon,name,val,detail,target){return `<button class="card score clickable" style="text-align:left;width:100%" onclick="category='${target}';screen='dashboard';render()"><div class="emoji">${icon}</div><h3>${name}</h3><div class="num">${val}<small style="font-size:17px">/100</small></div><div class="bar"><div class="fill" style="width:${val}%"></div></div><div class="status">${val>=80?'Good':val>=65?'Fair':'Needs attention'} · ${detail}</div></button>`}
+
+function renderNav(){
+  document.getElementById('periodNav').innerHTML=`<div class="subnav">${Object.entries(periods).map(([k,v])=>`<button class="${period===k?'active':''}" onclick="period='${k}';screen='dashboard';render()">${v}</button>`).join('')}</div>`;
+  document.getElementById('categoryNav').innerHTML=`<div class="subnav">${Object.entries(categories).map(([k,v])=>`<button class="${category===k?'active':''}" onclick="category='${k}';screen='dashboard';render()">${v}</button>`).join('')}</div>`;
+}
+
+function overallView(){
+ const x=d(),s=scores(x);
+ return `<div class="grid scores">
+ ${scoreCard('😴','Sleep',s.s,`${x.sleep.duration.toFixed(1)}h · charge ${x.sleep.charge}`,'sleep')}
+ ${scoreCard('❤️','Recovery',s.r,`HRV ${x.recovery.hrv} · RHR ${x.recovery.rhr}`,'recovery')}
+ ${scoreCard('🏃','Activity',s.a,`${data.plan.sessions.filter(z=>z.done).length}/${data.plan.sessions.length} plan items`,'activity')}
+ ${scoreCard('🍽️','Nutrition',s.n,`${x.nutrition.protein}g protein`,'nutrition')}</div>
+ <div class="section-title"><h2>Overall</h2></div>
+ <div class="card overall"><div class="big">${s.o}<small style="font-size:18px">/100</small></div><div><b>${period==='daily'?'Today':period==='weekly'?'This week':'This month'}</b><p class="muted">A transparent summary of sleep, recovery, activity and nutrition. Tap a score above for the detail.</p></div></div>
+ <div class="section-title"><h2>${period==='daily'?'Today':period==='weekly'?'This week':'This month'} at a glance</h2></div>
+ ${period==='daily'?dailyGlance(x):period==='weekly'?weeklyGlance():monthlyGlance()}`;
+}
+
+function dailyGlance(x){
+ const missing=[];
+ if(!x.nutrition.breakfast&&!x.nutrition.lunch&&!x.nutrition.dinner) missing.push('Food');
+ if(!x.body.weight) missing.push('Weight');
+ if(!x.body.bp) missing.push('Blood pressure');
+ const reminder=missing.length?`<div class="notice"><b>Complete your tracker</b><br><span>${missing.join(' · ')} still need${missing.length===1?'s':''} to be logged.</span><div class="actions" style="margin-top:8px"><button class="btn small" onclick="screen='entry';render()">Add missing data</button></div></div>`:'<div class="card"><b>Tracker complete</b><p class="muted">Your main manual fields are filled in for today.</p></div>';
+ return `${reminder}<div class="grid two" style="margin-top:14px"><div class="card"><b>Key metrics</b><div class="metrics" style="margin-top:10px">
+ <div class="metric"><b>${x.sleep.bed}</b><span>Bedtime</span></div><div class="metric"><b>${x.sleep.wake}</b><span>Wake time</span></div>
+ <div class="metric"><b>${x.sleep.rem} min</b><span>REM</span></div><div class="metric"><b>${x.sleep.deep} min</b><span>Deep</span></div>
+ <div class="metric"><b>${x.recovery.hrv}</b><span>HRV</span></div><div class="metric"><b>${x.recovery.rhr}</b><span>Resting HR</span></div>
+ <div class="metric"><b>${x.activity.steps.toLocaleString()}</b><span>Steps</span></div><div class="metric"><b>${x.nutrition.protein}g</b><span>Protein</span></div></div></div>
+ <div class="card"><b>Weekly plan</b><div class="list" style="margin-top:10px">${data.plan.sessions.map(s=>`<div class="entry"><div><b>${s.day} · ${s.type}</b><br><small>${s.target}</small></div><span class="${s.done?'done':'pending'}">${s.done?'✓':'○'}</span></div>`).join('')}</div></div></div>`;
+}
+
+function weeklyGlance(){
+ const done=data.plan.sessions.filter(s=>s.done).length,total=data.plan.sessions.length||1;
+ return `<div class="card"><div class="section-title" style="margin-top:0"><h2>Weekly training plan</h2><span class="pill">${done}/${total} completed</span></div><div class="bar"><div class="fill" style="width:${Math.round(done/total*100)}%"></div></div><p class="muted">Training score includes rolling progress against this week's plan.</p>${data.plan.sessions.map((s,i)=>`<div class="plan-row"><span class="tag">${s.day}</span><div><b>${s.type}</b><br><small class="muted">${s.target}${s.priority?' · '+s.priority+' priority':''}</small></div><button class="btn small ${s.done?'secondary':''}" onclick="togglePlan(${i})">${s.done?'Done':'Mark done'}</button></div>`).join('')}</div>`;
+}
+
+function monthlyGlance(){
+ const rows=Object.entries(data.days).sort((a,b)=>a[0].localeCompare(b[0]));
+ const avg=key=>rows.length?Math.round(rows.reduce((t,[,x])=>t+scores(x)[key],0)/rows.length):0;
+ return `<div class="grid three"><div class="card"><b>Average sleep</b><div class="num">${avg('s')}</div><span class="muted">/100</span></div><div class="card"><b>Average recovery</b><div class="num">${avg('r')}</div><span class="muted">/100</span></div><div class="card"><b>Average nutrition</b><div class="num">${avg('n')}</div><span class="muted">/100</span></div></div>
+ <div class="section-title"><h2>Monthly tracker</h2></div>${historyTable()}`;
+}
+
+function sleepDetail(){
+ const x=d();
+ return `<div class="card"><div class="section-title" style="margin-top:0"><h2>Sleep detail</h2><button class="btn small" onclick="screen='entry';render()">Edit</button></div><div class="grid three"><div class="metric"><b>${scoreSleep(x)}</b><span>Sleep score</span></div><div class="metric"><b>${x.sleep.duration.toFixed(1)}h</b><span>Total sleep</span></div><div class="metric"><b>${x.sleep.charge}</b><span>Sleep Charge</span></div></div><div class="metrics" style="margin-top:12px"><div class="metric"><b>${x.sleep.bed}</b><span>Bedtime</span></div><div class="metric"><b>${x.sleep.wake}</b><span>Wake time</span></div><div class="metric"><b>${x.sleep.rem} min</b><span>REM</span></div><div class="metric"><b>${x.sleep.deep} min</b><span>Deep sleep</span></div></div><p class="muted">Polar sleep-stage detail is retained separately so the main score stays simple and transparent.</p></div>`;
+}
+function recoveryDetail(){
+ const x=d(); return `<div class="card"><div class="section-title" style="margin-top:0"><h2>Recovery detail</h2><button class="btn small" onclick="screen='entry';render()">Edit</button></div><div class="grid three"><div class="metric"><b>${scoreRecovery(x)}</b><span>Recovery score</span></div><div class="metric"><b>${x.recovery.hrv}</b><span>HRV</span></div><div class="metric"><b>${x.recovery.rhr}</b><span>Resting HR</span></div><div class="metric"><b>${x.recovery.ans}</b><span>ANS Charge</span></div><div class="metric"><b>—</b><span>Skin temperature</span></div><div class="metric"><b>${x.activity.load||0}</b><span>Recent training load</span></div></div><p class="muted">Once Polar is connected, this page will be populated automatically with the full recovery dataset.</p></div>`;
+}
+function activityDetail(){
+ const done=data.plan.sessions.filter(s=>s.done).length,total=data.plan.sessions.length;
+ const x=d(); return `<div class="grid two"><div class="card"><div class="section-title" style="margin-top:0"><h2>Activity</h2></div><div class="metrics"><div class="metric"><b>${x.activity.steps.toLocaleString()}</b><span>Steps</span></div><div class="metric"><b>${x.activity.duration||0} min</b><span>Training time</span></div><div class="metric"><b>${x.activity.load||0}</b><span>Training load</span></div><div class="metric"><b>${x.activity.rpe||'—'}</b><span>RPE</span></div></div></div><div class="card"><div class="section-title" style="margin-top:0"><h2>Plan progress</h2><button class="btn small" onclick="period='weekly';category='activity';screen='dashboard';render()">Weekly plan</button></div><div class="num">${done}/${total}</div><p class="muted">planned sessions completed</p></div></div><div class="card" style="margin-top:14px"><b>Training sessions</b><p class="muted">Polar sessions will appear here automatically once connected. Gym sessions can be entered manually.</p></div>`;
+}
+function nutritionDetail(){
+ const x=d(); return `<div class="card"><div class="section-title" style="margin-top:0"><h2>Nutrition</h2><button class="btn small" onclick="screen='entry';render()">Log nutrition</button></div><div class="grid four" style="grid-template-columns:repeat(4,1fr)"><div class="metric"><b>${x.nutrition.protein}g</b><span>Protein</span></div><div class="metric"><b>—</b><span>Carbs</span></div><div class="metric"><b>—</b><span>Fat</span></div><div class="metric"><b>${x.nutrition.creatine?'✓':'—'}</b><span>Creatine</span></div></div><div class="section-title"><h2>Food log</h2></div><div class="list">${[['Breakfast',x.nutrition.breakfast],['Lunch',x.nutrition.lunch],['Dinner',x.nutrition.dinner],['Snacks',x.nutrition.snacks]].map(([k,v])=>`<div class="entry"><div><b>${k}</b><br><small>${esc(v)||'Not logged'}</small></div></div>`).join('')}</div><p class="muted">Carbs, fats and rolling daily/weekly/monthly nutrition averages are ready to be added to the data model next.</p></div>`;
+}
+
+function entryView(){let x=d();return `<div class="card"><div class="section-title" style="margin-top:0"><h2>Daily data</h2></div><form onsubmit="saveDaily(event)"><div class="formgrid"><label>Sleep duration (hours)<input id="sd" type="number" step="0.05" value="${x.sleep.duration}"></label><label>Sleep Charge<input id="sc" type="number" min="0" max="100" value="${x.sleep.charge}"></label><label>Bedtime<input id="bed" type="time" value="${x.sleep.bed}"></label><label>Wake time<input id="wake" type="time" value="${x.sleep.wake}"></label><label>REM (minutes)<input id="rem" type="number" value="${x.sleep.rem}"></label><label>Deep sleep (minutes)<input id="deep" type="number" value="${x.sleep.deep}"></label><label>HRV<input id="hrv" type="number" step="1" value="${x.recovery.hrv}"></label><label>Resting HR<input id="rhr" type="number" value="${x.recovery.rhr}"></label><label>ANS Charge<input id="ans" type="number" step="0.1" value="${x.recovery.ans}"></label><label>Steps<input id="steps" type="number" value="${x.activity.steps}"></label><label>Protein (g)<input id="protein" type="number" value="${x.nutrition.protein}"></label><label>Weight<input id="weight" value="${x.body.weight}"></label><label>Blood pressure<input id="bp" placeholder="e.g. 125/82" value="${x.body.bp}"></label><label>Alcohol<select id="alcohol"><option value="false" ${!x.nutrition.alcohol?'selected':''}>No</option><option value="true" ${x.nutrition.alcohol?'selected':''}>Yes</option></select></label><label>Creatine<select id="creatine"><option value="true" ${x.nutrition.creatine?'selected':''}>Taken</option><option value="false" ${!x.nutrition.creatine?'selected':''}>Not taken</option></select></label><label class="full">Breakfast<textarea id="breakfast">${esc(x.nutrition.breakfast)}</textarea></label><label class="full">Lunch<textarea id="lunch">${esc(x.nutrition.lunch)}</textarea></label><label class="full">Dinner<textarea id="dinner">${esc(x.nutrition.dinner)}</textarea></label><label class="full">Snacks<textarea id="snacks">${esc(x.nutrition.snacks)}</textarea></label></div><div class="actions" style="margin-top:15px"><button class="btn" type="submit">Save daily data</button></div></form></div>`}
+
+function trainingView(){period='weekly';category='activity';return weeklyGlance()}
+function planView(){return `<div class="card"><div class="section-title" style="margin-top:0"><h2>Weekly plan</h2><button class="btn small" onclick="addPlan()">Add session</button></div><p class="muted">Define the week here after agreeing the plan in ChatGPT. The tracker records progress against it.</p>${data.plan.sessions.map((s,i)=>`<div class="plan-row"><span class="tag">${s.day}</span><div><b>${s.type}</b><br><small class="muted">${s.target} · ${s.priority||'No priority'}</small></div><div class="actions"><button class="btn small secondary" onclick="editPlan(${i})">Edit</button><button class="btn small secondary" onclick="removePlan(${i})">×</button></div></div>`).join('')}</div>`}
+function gymView(){return `<div class="card"><div class="section-title" style="margin-top:0"><h2>Gym log</h2><button class="btn small" onclick="addGym()">Log session</button></div>${data.gym.length?`<div class="list">${data.gym.map((g,i)=>`<div class="entry"><div><b>${esc(g.name)}</b><br><small>${esc(g.date)} · ${g.exercises.length} exercises</small><div class="muted" style="margin-top:5px">${g.exercises.map(e=>`${esc(e.e)} · ${esc(e.sets)} · ${esc(e.weight)}`).join('<br>')}</div></div><button class="btn small secondary" onclick="removeGym(${i})">Remove</button></div>`).join('')}</div>`:'<p class="muted">No gym sessions recorded yet. Log your exercises, sets, reps and weights here.</p>'}</div>`}
+function historyView(){let rows=Object.entries(data.days).sort((a,b)=>b[0].localeCompare(a[0]));return `<div class="card"><div class="section-title" style="margin-top:0"><h2>History</h2></div><div class="list">${rows.map(([date,x])=>{let s=scores(x);return `<div class="entry"><div><b>${date}</b><br><small>Sleep ${s.s} · Recovery ${s.r} · Activity ${s.a} · Nutrition ${s.n}</small></div><b>${s.o}</b></div>`}).join('')}</div></div>`}
+
+function dashboard(){if(category==='overall')return overallView();if(category==='sleep')return sleepDetail();if(category==='recovery')return recoveryDetail();if(category==='activity')return activityDetail();if(category==='nutrition')return nutritionDetail()}
+function render(){
+ renderNav();
+ let el=document.getElementById('app');
+ if(screen==='entry')el.innerHTML=entryView();
+ else if(screen==='plan')el.innerHTML=planView();
+ else if(screen==='gym')el.innerHTML=gymView();
+ else if(screen==='history')el.innerHTML=historyView();
+ else el.innerHTML=dashboard();
+ document.getElementById('dateLabel').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function saveDaily(e){e.preventDefault();let x=d();x.sleep.duration=+sd.value;x.sleep.charge=+sc.value;x.sleep.bed=bed.value;x.sleep.wake=wake.value;x.sleep.rem=+rem.value;x.sleep.deep=+deep.value;x.recovery.hrv=+hrv.value;x.recovery.rhr=+rhr.value;x.recovery.ans=+ans.value;x.activity.steps=+steps.value;x.nutrition.protein=+protein.value;x.nutrition.alcohol=alcohol.value==='true';x.nutrition.creatine=creatine.value==='true';x.body.weight=weight.value;x.body.bp=bp.value;x.nutrition.breakfast=breakfast.value;x.nutrition.lunch=lunch.value;x.nutrition.dinner=dinner.value;x.nutrition.snacks=snacks.value;screen='dashboard';category='overall';save()}
+function togglePlan(i){data.plan.sessions[i].done=!data.plan.sessions[i].done;save()}
+function addPlan(){let type=prompt('Activity type (e.g. Run, Gym, Pilates, Football)');if(!type)return;let target=prompt('Target (e.g. 6km, Upper body, 40 min)')||'';let day=prompt('Day (Mon/Tue/Wed...)')||'';data.plan.sessions.push({day,type,target,priority:'Medium',done:false});save()}
+function editPlan(i){let s=data.plan.sessions[i];s.type=prompt('Activity type',s.type)||s.type;s.target=prompt('Target',s.target)||s.target;s.priority=prompt('Priority: High / Medium / Low',s.priority)||s.priority;save()}
+function removePlan(i){if(confirm('Remove this planned session?')){data.plan.sessions.splice(i,1);save()}}
+function addGym(){let name=prompt('Session name', 'Upper body');if(!name)return;let ex=[];while(true){let e=prompt('Exercise name (Cancel when finished)');if(!e)break;let sets=prompt('Sets × reps (e.g. 3 × 10)','3 × 10')||'';let weight=prompt('Weight / assistance','')||'';ex.push({e,sets,weight})}data.gym.unshift({date:today,name,exercises:ex});save()}
+function removeGym(i){if(confirm('Remove this gym session?')){data.gym.splice(i,1);save()}}
+
+render();
+</script>
+</body></html>
