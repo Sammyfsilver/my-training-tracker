@@ -1,0 +1,10 @@
+{
+  "name": "my-training-tracker-v6",
+  "private": true,
+  "version": "6.0.0",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "web-push": "^3.6.7"
+  }
+}
